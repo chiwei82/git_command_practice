@@ -22,7 +22,16 @@ bool solve(int seed)
       }
       main_board.f++;
    } while ( main_board.f != main_board.end );
-   return false;
+
+   // check if all paired
+   for (int j=0; j<BOARD_H; j++){
+      for(int i=0; i<BOARD_W; i++){
+         if (main_board.arr_val[main_board.f].mat[j][i] != PAIRED){
+            return false;
+         }
+      }
+   }
+   return true;
 }
 
 bool take(board* p, pair z)

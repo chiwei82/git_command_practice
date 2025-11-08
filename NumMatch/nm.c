@@ -2,8 +2,6 @@
 
 bool solve(int seed)
 {
-   printf("[DEBUG] sizeof(boards)=%zu, f=%d, end=%d\n", sizeof(main_board), main_board.f, main_board.end);
-
    boards main_board;
    board first_b = randfill(seed);
 
@@ -23,6 +21,7 @@ bool solve(int seed)
    main_board.arr_val[0] = first_b;
    main_board.arr[0] = &main_board.arr_val[0];
 
+   printf("[DEBUG] sizeof(boards)=%zu, f=%d, end=%d\n", sizeof(main_board), main_board.f, main_board.end);
    // mother pointer points to first board
    do {
       board *mother_board = main_board.arr[main_board.f];

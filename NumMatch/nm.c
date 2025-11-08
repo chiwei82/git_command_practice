@@ -5,7 +5,6 @@ bool solve(int seed)
    boards main_board;
    boards *head = &main_board;
    // board first_b = randfill(seed);
-   board seed_b = randfill(seed);
 
    board first_b = {
          .mat = {

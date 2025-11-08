@@ -6,16 +6,6 @@ bool solve(int seed)
    boards *head = &main_board;
    board first_b = randfill(seed);
 
-   // fake board
-   // board first_b = {
-   //    .mat = {
-   //       {1, 8,      8, 6, 6},
-   //       {6, 2, PAIRED, 2, 5},
-   //       {3, 2, PAIRED, 9, 5},
-   //       {3, 4,      4, 4, 8}
-   //    }
-   // };
-
    // init first board
    main_board.f = 0;
    main_board.end = 1;
@@ -56,17 +46,6 @@ bool solve(int seed)
       }
       main_board.f++;
    } while ( main_board.f != main_board.end );
-
-   for (int i = 0; i < main_board.end; i++){
-      for (int j = 0; j < BOARD_H; j++){
-         for (int k = 0; k < BOARD_W; k++){
-            printf("%d ", main_board.arr_val[i].mat[j][k]);
-         }
-         printf("\n");
-      }
-      printf("\n");
-   }
-
    return false;
 }
 

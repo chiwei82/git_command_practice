@@ -1,0 +1,280 @@
+#include "nm.h"
+
+bool solve(int seed)
+{
+   boards main_board;
+   board first_b = randfill(seed);
+
+   // fake board
+   // board first_b = {
+   //    .mat = {
+   //       {1, 8,      8, 6, 6},
+   //       {6, 2, PAIRED, 2, 5},
+   //       {3, 2, PAIRED, 9, 5},
+   //       {3, 4,      4, 4, 8}
+   //    }
+   // };
+
+   // init first board
+   main_board.f = 0;
+   main_board.end = 1;
+   main_board.arr_val[0] = first_b;
+   main_board.arr[0] = &main_board.arr_val[0];
+
+   // mother pointer points to first board
+   do {
+      board *mother_board = main_board.arr[main_board.f];
+      for (int j=0; j<BOARD_H; j++){
+         for(int i=0; i<BOARD_W; i++){
+            // loop and find possible num_2
+            position_list pos = get_candinate(mother_board, j, i);
+            int index_pos = 0;
+            while (index_pos < pos.count){
+               int pos_j = pos.pos_list[index_pos][0];
+               int pos_i = pos.pos_list[index_pos][1];
+               index_pos++;
+               
+               // test printf
+               printf("(%d, %d)-(%d, %d) v->%d candinate->%d",
+               j, i, pos_j, pos_i, 
+               (mother_board)->mat[j][i], (mother_board)->mat[pos_j][pos_i]
+               );
+               printf("\n");
+
+               // if this pair isn't in main_board
+               // mark where {j, i} ,{nj, ni} as paired
+               // then store it in main_board
+               pair new_pair = (pair){i, j, pos_i, pos_j};
+               board new_board = board_init(mother_board, new_pair);
+               bool is_unique = checkUnique(&main_board, new_board);
+               if (is_unique) {
+                  main_board.arr_val[main_board.end] = new_board; // ← 深拷貝整個 struct
+                  main_board.arr[main_board.end] = &main_board.arr_val[main_board.end];
+                  main_board.end++;
+               }
+            }
+         }
+      }
+      main_board.f++;
+   } while ( main_board.f != main_board.end );
+
+   for (int i = 0; i < main_board.end; i++){
+      for (int j = 0; j < BOARD_H; j++){
+         for (int k = 0; k < BOARD_W; k++){
+            printf("%d ", main_board.arr[i]->mat[j][k]);
+         }
+         printf("\n");
+      }
+      printf("\n");
+   }
+
+   return false;
+}
+
+bool take(board* p, pair z)
+{
+   // x means i, y menas j ; called by mat[j][i]
+   int x1 = z.x1, x2 = z.x2, y1 = z.y1, y2 = z.y2;
+   int num_1 = p->mat[y1][x1], num_2 = p->mat[y2][x2];
+   
+   bool is_same = (num_1 == num_2 && num_1 != PAIRED && num_2 != PAIRED);
+   bool is_ten = (num_1 + num_2 == PAIRED_SUM);
+   bool is_straight = checkStraight(p, z);
+   bool is_touching = checkTouching(z);
+
+   // if it's same      or  it's sum to ten
+   //    and
+   //    it's touching  or  it's straight
+   if ((is_same || is_ten) && (is_straight || is_touching)){
+      return true;
+   }
+   return false;
+}
+
+board randfill(int n)
+{
+   srand(n);
+   board b;
+   for(int j=0; j<BOARD_H; j++){
+      for(int i=0; i<BOARD_W; i++){
+         b.mat[j][i] = rand()%9 + 1;
+      }
+   }
+   return b;
+}
+
+void test(void)
+{
+   // fake board
+   board b = {
+      .mat = {
+         {1, 8,      8, 6, 6},
+         {6, 2, PAIRED, 2, 5},
+         {3, 2, PAIRED, 9, 5},
+         {3, 4,      4, 4, 8}
+      }
+   };
+   
+   // check touched
+   assert(checkTouching((pair){1,0,2,0}));  // (0,1) (0,2)
+   assert(checkTouching((pair){1,1,1,2}));  // (1,1) (2,1)
+   assert(checkTouching((pair){3,0,2,1}));  // (0,3) (1,2)
+   assert(checkTouching((pair){2,1,3,0}));  // (1,2) (0,3)
+   assert(!checkTouching((pair){0,2,2,2})); // (2,0) (2,2)
+
+   /*check straight*/
+   // note pair is x1, y1 -> in matrix it should be (y, x)
+   // checkLinear
+   assert(checkLinear((pair){1,0,2,0})); // (0,1) to (0,2)
+   assert(checkLinear((pair){1,1,1,2})); // (1,1) to (2,1)
+   assert(checkLinear((pair){2,2,0,2})); // (2,2) to (2,0)
+   // checkNoBetween
+   assert(checkNoBetween(&b, (pair){1,1,2,0}));  // (0,2) to (1,1)
+   assert(checkNoBetween(&b, (pair){2,0,2,3}));  // (0,2) to (3,2)
+   assert(!checkNoBetween(&b, (pair){3,0,3,3})); // (0,3) to (3,3)
+   assert(checkNoBetween(&b, (pair){1,1,3,1}));  // (1,1) to (1,3)
+   assert(!checkNoBetween(&b, (pair){4,0,1,3})); // (0,4) to (3,1)
+   //checkStraight
+   assert(checkStraight(&b, (pair){1,0,2,0}));  // (0,1) to (0,2)
+   assert(checkStraight(&b, (pair){1,1,1,2}));  // (1,1) to (2,1)
+   assert(!checkStraight(&b, (pair){2,2,0,2})); // (2,2) paired to (2,0)
+   assert(checkStraight(&b, (pair){3,0,2,1}));  // (0,3) to (1,2) paired
+   //solve
+   assert(!solve(6)); // (0,1) to (0,2)
+   
+}
+
+/* helper functions */
+int abs_val(int x)
+{
+   if (x < 0){
+      return -x;
+   }
+   return x;
+}
+
+bool inbound(int j, int i)
+{
+   return 0 <= j && j < BOARD_H && 0 <= i && i < BOARD_W;
+}
+
+eight_dirs dir_init(void)
+{
+   eight_dirs dir = {
+      .j = {0, 1, 0, -1, 1, 1, -1, -1},
+      .i = {1, 0, -1, 0, 1, -1, 1, -1}
+   };
+   return dir;
+}
+
+bool checkStraight(board* p, pair z)
+{
+   // T1: check it is reachable by just heading 8 directions
+   // T2: check there is no any other number between
+   bool is_linear = checkLinear(z);
+   bool is_clear = true;
+   if (is_linear){
+      is_clear = checkNoBetween(p, z);
+   }
+   return is_linear && is_clear;
+}
+
+bool checkLinear(pair z)
+{
+   int x1 = z.x1, x2 = z.x2, y1 = z.y1, y2 = z.y2;
+   int dx = x2 - x1, dy = y2 - y1;
+
+   bool is_linear = false;
+   bool is_vertical = (dy == 0 && dx != 0);
+   bool is_horizontal = (dx == 0 && dy != 0);
+   bool is_diagonal = (abs_val(dy) == abs_val(dx));
+   if ( is_vertical || is_horizontal || is_diagonal){
+      is_linear = true;
+   }
+   return is_linear;
+}
+
+bool checkNoBetween(board* p, pair z)
+{
+   int x1 = z.x1, x2 = z.x2, y1 = z.y1, y2 = z.y2;
+   int dx = x2 - x1, dy = y2 - y1;
+   int step_x = (dx > 0) ? 1 : (dx < 0 ? -1 : 0);
+   int step_y = (dy > 0) ? 1 : (dy < 0 ? -1 : 0);
+   
+   bool is_clear = true;
+   int j = y1 + step_y, i = x1 + step_x;
+   while (inbound(j, i) && (j != y2 || i != x2)) {
+      if (p->mat[j][i] != PAIRED){
+         return false;
+      }
+      j += step_y;
+      i += step_x;
+   }
+   return is_clear;
+}
+
+bool checkTouching(pair z)
+{
+   int x1 = z.x1, x2 = z.x2, y1 = z.y1, y2 = z.y2;
+   // TODO: initialize directions
+   eight_dirs dir = dir_init();
+   // touching means adjacent
+   bool is_adjacent = false;
+   for (int i=0; i < EIGHT_DIRS; i++){
+      int nj = y1 + dir.j[i];
+      int ni = x1 + dir.i[i];
+      if (inbound(nj, ni) && nj == y2 && ni == x2){
+         is_adjacent = true;
+      }
+   }
+   return is_adjacent;
+}
+
+position_list get_candinate(board *b, int j, int i){
+   
+   position_list pos;
+   pos.count = 0;
+   eight_dirs dir = dir_init();
+   
+   for (int range = 1; range <= BOARD_W ; range++){
+      for (int nei=0; nei < EIGHT_DIRS; nei++){
+         int nj = j + dir.j[nei] * range; 
+         int ni = i + dir.i[nei] * range;
+         if (inbound(nj, ni) && take(b, (pair){i, j, ni, nj})){
+            pos.pos_list[pos.count][0] = nj;
+            pos.pos_list[pos.count][1] = ni;
+            pos.count++;
+         }
+      }
+   }
+   return pos;
+}
+
+board board_init(board *old_board, pair z){
+   board new_board;
+   for (int j=0; j<BOARD_H; j++){
+      for (int i=0; i<BOARD_W; i++){
+         new_board.mat[j][i] = old_board->mat[j][i];
+      }
+   }
+   new_board.mat[z.y1][z.x1] = PAIRED;
+   new_board.mat[z.y2][z.x2] = PAIRED;
+   return new_board;
+}
+
+bool checkUnique(boards *main_board, board new_board) {
+    for (int i = 0; i < main_board->end; i++) {
+        bool identical = true; // 假設目前這個 board 一樣
+        for (int j = 0; j < BOARD_H && identical; j++) {
+            for (int k = 0; k < BOARD_W; k++) {
+                if (main_board->arr[i]->mat[j][k] != new_board.mat[j][k]) {
+                    identical = false; // 發現不同
+                }
+            }
+        }
+        if (identical) {
+            return false;
+        }
+    }
+    return true;
+}

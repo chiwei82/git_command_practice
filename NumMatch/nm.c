@@ -218,7 +218,7 @@ void take_and_cpy(boards *head, board *mother_board, int j, int i){
             if (is_unique) {
                board_copy(cpy_b, &head->arr_val[head->end]);
                head->end++;
-               printf("f: %li, end: %li", head->end, head->f);
+               printf("f: %li, end: %li \n", head->end, head->f);
             }
          }
       }

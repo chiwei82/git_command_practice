@@ -23,6 +23,16 @@ bool solve(int seed)
       main_board.f++;
    } while ( main_board.f != main_board.end );
 
+   for (int i=0; i<main_board.f; i++){
+      for (int j=0; j<BOARD_H; j++){
+         for (int k=0; k<BOARD_W; k++){
+            printf("%d ", main_board.arr_val[i].mat[j][k]);
+         }
+         printf("\n");
+      }
+      printf("\n");
+   }
+
    // check if all paired
    for (int j=0; j<BOARD_H; j++){
       for(int i=0; i<BOARD_W; i++){
@@ -209,7 +219,6 @@ void take_and_cpy(boards *head, board *mother_board, int j, int i){
             if (is_unique) {
                board_copy(cpy_b, &head->arr_val[head->end]);
                head->end++;
-               // printf("f: %li, end: %li \n", head->end, head->f);
             }
          }
       }

@@ -23,14 +23,6 @@ bool solve(int seed)
                int pos_j = pos.pos_list[index_pos][0];
                int pos_i = pos.pos_list[index_pos][1];
                index_pos++;
-               
-               // test printf
-               printf("(%d, %d)-(%d, %d) v->%d candinate->%d",
-               j, i, pos_j, pos_i, 
-               (mother_board)->mat[j][i], (mother_board)->mat[pos_j][pos_i]
-               );
-               printf("\n");
-
                // if this pair isn't in main_board
                // mark where {j, i} ,{nj, ni} as paired
                // then store it in main_board

@@ -26,7 +26,7 @@ bool solve(int seed)
       for (int j=0; j<BOARD_H; j++){
          for(int i=0; i<BOARD_W; i++){
             // loop and find possible num_2
-            take_and_cpy(head, mother_board, i, j);
+            take_and_cpy(head, mother_board, j, i);
          }
       }
       main_board.f++;

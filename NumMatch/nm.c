@@ -23,15 +23,14 @@ bool solve(int seed)
       main_board.f++;
    } while ( main_board.f != main_board.end );
 
-   for (int i=0; i<main_board.f; i++){
-      for (int j=0; j<BOARD_H; j++){
-         for (int k=0; k<BOARD_W; k++){
-            printf("%d ", main_board.arr_val[i].mat[j][k]);
-         }
-         printf("\n");
+   printf("%i \n",seed);
+   for (int j=0; j<BOARD_H; j++){
+      for (int k=0; k<BOARD_W; k++){
+         printf("%d ", main_board.arr_val[main_board.f-1].mat[j][k]);
       }
       printf("\n");
    }
+   printf("\n");
 
    // check if all paired
    for (int j=0; j<BOARD_H; j++){

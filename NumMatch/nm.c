@@ -17,23 +17,7 @@ bool solve(int seed)
       for (int j=0; j<BOARD_H; j++){
          for(int i=0; i<BOARD_W; i++){
             // loop and find possible num_2
-            position_list pos = get_candinate(mother_board, j, i);
-            int index_pos = 0;
-            while (index_pos < pos.count){
-               int pos_j = pos.pos_list[index_pos][0];
-               int pos_i = pos.pos_list[index_pos][1];
-               index_pos++;
-               // if this pair isn't in main_board
-               // mark where {j, i} ,{nj, ni} as paired
-               // then store it in main_board
-               pair new_pair = (pair){i, j, pos_i, pos_j};
-               board new_board = board_init(mother_board, new_pair);
-               bool is_unique = checkUnique(head, new_board);
-               if (is_unique) {
-                  board_copy(head, new_board);
-                  main_board.end++;
-               }
-            }
+            take_and_cpy(head, mother_board, i, j);
          }
       }
       main_board.f++;
@@ -56,6 +40,8 @@ bool take(board* p, pair z)
    //    and
    //    it's touching  or  it's straight
    if ((is_same || is_ten) && (is_straight || is_touching)){
+      p->mat[y1][x1] = PAIRED;
+      p->mat[y2][x2] = PAIRED;
       return true;
    }
    return false;
@@ -200,54 +186,49 @@ bool checkTouching(pair z)
    return is_adjacent;
 }
 
-position_list get_candinate(board *b, int j, int i){
-   
-   position_list pos;
-   pos.count = 0;
+void take_and_cpy(boards *head, board *mother_board, int j, int i){
    eight_dirs dir = dir_init();
-   
    for (int range = 1; range <= BOARD_W ; range++){
       for (int nei=0; nei < EIGHT_DIRS; nei++){
          int nj = j + dir.j[nei] * range; 
          int ni = i + dir.i[nei] * range;
-         if (inbound(nj, ni) && take(b, (pair){i, j, ni, nj})){
-            pos.pos_list[pos.count][0] = nj;
-            pos.pos_list[pos.count][1] = ni;
-            pos.count++;
-            assert(pos.count <= EIGHT_DIRS);
+         board clean_board;
+         board *cpy_b = &clean_board; 
+         board_copy(mother_board, cpy_b);
+         if (inbound(nj, ni) && take(cpy_b, (pair){i, j, ni, nj})){
+            bool is_unique = checkUnique(head, cpy_b);
+            if (is_unique) {
+               board_copy(cpy_b, &head->arr_val[head->end]);
+               head->end++;
+            }
          }
       }
    }
-   return pos;
 }
 
-board board_init(board *old_board, pair z){
-   board new_board;
+void board_copy(board *old_board, board *new_board){
    for (int j=0; j<BOARD_H; j++){
       for (int i=0; i<BOARD_W; i++){
-         new_board.mat[j][i] = old_board->mat[j][i];
+         new_board->mat[j][i] = old_board->mat[j][i];
       }
    }
-   new_board.mat[z.y1][z.x1] = PAIRED;
-   new_board.mat[z.y2][z.x2] = PAIRED;
-   return new_board;
 }
 
-bool checkUnique(boards *main_board_head, board new_board) {
-    for (int i = 0; i < main_board_head->end; i++) {
-        bool identical = true;
-        for (int j = 0; j < BOARD_H && identical; j++) {
-            for (int k = 0; k < BOARD_W; k++) {
-                if (main_board_head->arr_val[i].mat[j][k] != new_board.mat[j][k]) {
-                    identical = false;
-                }
-            }
-        }
-        if (identical) {
-            return false;
-        }
-    }
-    return true;
+bool checkUnique(boards *main_board_head, board *new_board) {
+   for (int i = 0; i < main_board_head->end; i++) {
+      bool identical = true;
+      for (int j = 0; j < BOARD_H && identical; j++) {
+         for (int k = 0; k < BOARD_W; k++) {
+               if (main_board_head->arr_val[i].mat[j][k] != new_board->mat[j][k]) {
+                  identical = false;
+               }
+         }
+      }
+      if (identical) {
+         return false;
+      }
+   }
+   return true;
 }
 
 void board_copy(boards *main_board_head, board new_board) {

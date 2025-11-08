@@ -230,11 +230,3 @@ bool checkUnique(boards *main_board_head, board *new_board) {
    }
    return true;
 }
-
-void board_copy(boards *main_board_head, board new_board) {
-   for (int j=0; j<BOARD_H; j++){
-      for (int i=0; i<BOARD_W; i++){
-         main_board_head->arr_val[main_board_head->end].mat[j][i] = new_board.mat[j][i];
-      }
-   }
-}

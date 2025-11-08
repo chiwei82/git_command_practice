@@ -6,6 +6,15 @@ bool solve(int seed)
    boards *head = &main_board;
    board first_b = randfill(seed);
 
+   board first_b = {
+         .mat = {
+            {1, 8,      8, 6, 6},
+            {6, 2, PAIRED, 2, 5},
+            {3, 2, PAIRED, 9, 5},
+            {3, 4,      4, 4, 8}
+         }
+      };
+
    // init first board
    main_board.f = 0;
    main_board.end = 1;
@@ -105,7 +114,7 @@ void test(void)
    assert(!checkStraight(&b, (pair){2,2,0,2})); // (2,2) paired to (2,0)
    assert(checkStraight(&b, (pair){3,0,2,1}));  // (0,3) to (1,2) paired
    //solve
-   // assert(!solve(6)); // (0,1) to (0,2)
+   assert(!solve(6)); // (0,1) to (0,2)
    
 }
 
@@ -209,6 +218,7 @@ void take_and_cpy(boards *head, board *mother_board, int j, int i){
             if (is_unique) {
                board_copy(cpy_b, &head->arr_val[head->end]);
                head->end++;
+               printf("f: %li, end: %li", head->end, head->f);
             }
          }
       }

@@ -3,6 +3,7 @@
 bool solve(int seed)
 {
    boards main_board;
+   boards *head = &main_board;
    board first_b = randfill(seed);
 
    // fake board
@@ -19,12 +20,10 @@ bool solve(int seed)
    main_board.f = 0;
    main_board.end = 1;
    main_board.arr_val[0] = first_b;
-   main_board.arr[0] = &main_board.arr_val[0];
-
-   printf("[DEBUG] sizeof(boards)=%zu, f=%d, end=%d\n", sizeof(main_board), main_board.f, main_board.end);
    // mother pointer points to first board
    do {
-      board *mother_board = main_board.arr[main_board.f];
+      // mother_board pointed to where f is
+      board *mother_board = &main_board.arr_val[main_board.f];
       for (int j=0; j<BOARD_H; j++){
          for(int i=0; i<BOARD_W; i++){
             // loop and find possible num_2
@@ -47,10 +46,9 @@ bool solve(int seed)
                // then store it in main_board
                pair new_pair = (pair){i, j, pos_i, pos_j};
                board new_board = board_init(mother_board, new_pair);
-               bool is_unique = checkUnique(&main_board, new_board);
+               bool is_unique = checkUnique(head, new_board);
                if (is_unique) {
-                  main_board.arr_val[main_board.end] = new_board; // ← 深拷貝整個 struct
-                  main_board.arr[main_board.end] = &main_board.arr_val[main_board.end];
+                  board_copy(head, new_board);
                   main_board.end++;
                }
             }
@@ -62,7 +60,7 @@ bool solve(int seed)
    for (int i = 0; i < main_board.end; i++){
       for (int j = 0; j < BOARD_H; j++){
          for (int k = 0; k < BOARD_W; k++){
-            printf("%d ", main_board.arr[i]->mat[j][k]);
+            printf("%d ", main_board.arr_val[i].mat[j][k]);
          }
          printf("\n");
       }
@@ -245,6 +243,7 @@ position_list get_candinate(board *b, int j, int i){
             pos.pos_list[pos.count][0] = nj;
             pos.pos_list[pos.count][1] = ni;
             pos.count++;
+            assert(pos.count <= EIGHT_DIRS);
          }
       }
    }
@@ -263,13 +262,13 @@ board board_init(board *old_board, pair z){
    return new_board;
 }
 
-bool checkUnique(boards *main_board, board new_board) {
-    for (int i = 0; i < main_board->end; i++) {
-        bool identical = true; // 假設目前這個 board 一樣
+bool checkUnique(boards *main_board_head, board new_board) {
+    for (int i = 0; i < main_board_head->end; i++) {
+        bool identical = true;
         for (int j = 0; j < BOARD_H && identical; j++) {
             for (int k = 0; k < BOARD_W; k++) {
-                if (main_board->arr[i]->mat[j][k] != new_board.mat[j][k]) {
-                    identical = false; // 發現不同
+                if (main_board_head->arr_val[i].mat[j][k] != new_board.mat[j][k]) {
+                    identical = false;
                 }
             }
         }
@@ -278,4 +277,12 @@ bool checkUnique(boards *main_board, board new_board) {
         }
     }
     return true;
+}
+
+void board_copy(boards *main_board_head, board new_board) {
+   for (int j=0; j<BOARD_H; j++){
+      for (int i=0; i<BOARD_W; i++){
+         main_board_head->arr_val[main_board_head->end].mat[j][i] = new_board.mat[j][i];
+      }
+   }
 }

@@ -19,7 +19,6 @@ typedef struct board board;
 
 struct boards {
    board arr_val[BOARDS_MAX];
-   board *arr[BOARDS_MAX];
    long f;
    long end;
 };
@@ -44,6 +43,7 @@ bool checkStraight(board* p, pair z);
 bool checkTouching(pair z);
 bool checkUnique(boards *main_board, board new_board);
 int abs_val(int x);
+void board_copy(boards *main_board_head, board new_board);
 eight_dirs dir_init(void);
 position_list get_candinate(board *b, int j, int i);
 board board_init(board *old_board, pair z);

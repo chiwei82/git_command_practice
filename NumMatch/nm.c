@@ -2,6 +2,8 @@
 
 bool solve(int seed)
 {
+   printf("[DEBUG] sizeof(boards)=%zu, f=%d, end=%d\n", sizeof(main_board), main_board.f, main_board.end);
+
    boards main_board;
    board first_b = randfill(seed);
 

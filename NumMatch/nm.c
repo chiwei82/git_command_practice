@@ -4,16 +4,7 @@ bool solve(int seed)
 {
    boards main_board;
    boards *head = &main_board;
-   // board first_b = randfill(seed);
-
-   board first_b = {
-         .mat = {
-            {1, 8,      8, 6, 6},
-            {6, 2, PAIRED, 2, 5},
-            {3, 2, PAIRED, 9, 5},
-            {3, 4,      4, 4, 8}
-         }
-      };
+   board first_b = randfill(seed);
 
    // init first board
    main_board.f = 0;
@@ -218,7 +209,7 @@ void take_and_cpy(boards *head, board *mother_board, int j, int i){
             if (is_unique) {
                board_copy(cpy_b, &head->arr_val[head->end]);
                head->end++;
-               printf("f: %li, end: %li \n", head->end, head->f);
+               // printf("f: %li, end: %li \n", head->end, head->f);
             }
          }
       }

@@ -106,8 +106,7 @@ void test(void)
    assert(!checkStraight(&b, (pair){2,2,0,2})); // (2,2) paired to (2,0)
    assert(checkStraight(&b, (pair){3,0,2,1}));  // (0,3) to (1,2) paired
    //solve
-   // assert(!solve(6)); // (0,1) to (0,2)
-   
+   assert(!solve(6)); // (0,1) to (0,2)
 }
 
 /* helper functions */
@@ -195,7 +194,8 @@ bool checkTouching(pair z)
    return is_adjacent;
 }
 
-void take_and_cpy(boards *head, board *mb, int j, int i){
+void take_and_cpy(boards *head, board *mb, int j, int i)
+{
    eight_dirs dir = dir_init();
    for (int range = 1; range <= BOARD_W ; range++){
       for (int nei=0; nei < EIGHT_DIRS; nei++){
@@ -215,7 +215,8 @@ void take_and_cpy(boards *head, board *mb, int j, int i){
    }
 }
 
-void board_copy(board *old_board, board *new_board){
+void board_copy(board *old_board, board *new_board)
+{
    for (int j=0; j<BOARD_H; j++){
       for (int i=0; i<BOARD_W; i++){
          new_board->mat[j][i] = old_board->mat[j][i];
@@ -223,17 +224,20 @@ void board_copy(board *old_board, board *new_board){
    }
 }
 
-bool checkUnique(boards *main_board_head, board *new_board) {
-   for (int i = 0; i < main_board_head->end; i++) {
+bool checkUnique(boards *head, board *new_board)
+{
+   for (int i = 0; i < head->end; i++){
       bool identical = true;
-      for (int j = 0; j < BOARD_H && identical; j++) {
-         for (int k = 0; k < BOARD_W; k++) {
-               if (main_board_head->b_arr[i].mat[j][k] != new_board->mat[j][k]) {
+      for (int j = 0; j < BOARD_H && identical; j++){
+         for (int k = 0; k < BOARD_W; k++){
+               int head_val = head->b_arr[i].mat[j][k];
+               int new_val = new_board->mat[j][k];
+               if (head_val != new_val){
                   identical = false;
                }
          }
       }
-      if (identical) {
+      if (identical){
          return false;
       }
    }

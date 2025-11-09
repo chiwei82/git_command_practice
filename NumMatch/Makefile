@@ -1,4 +1,4 @@
-CFLAGS := -Wall -Wextra -Wpedantic -Wvla -Wfloat-equal -std=c99 # -Werror
+CFLAGS := -Wall -Wextra -Wpedantic -Wvla -Wfloat-equal -std=c99 -Werror
 SANITIZE := -fsanitize=undefined -fsanitize=address -g3
 OPTIMIZE := -O3
 CC := gcc # Also check clang

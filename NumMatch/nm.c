@@ -181,7 +181,6 @@ bool checkNoBetween(board* p, pair z)
 bool checkTouching(pair z)
 {
    int x1 = z.x1, x2 = z.x2, y1 = z.y1, y2 = z.y2;
-   // TODO: initialize directions
    eight_dirs dir = dir_init();
    // touching means adjacent
    bool is_adjacent = false;

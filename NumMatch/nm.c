@@ -105,6 +105,9 @@ void test(void)
    assert(checkStraight(&b, (pair){1,1,1,2}));  // (1,1) to (2,1)
    assert(!checkStraight(&b, (pair){2,2,0,2})); // (2,2) paired to (2,0)
    assert(checkStraight(&b, (pair){3,0,2,1}));  // (0,3) to (1,2) paired
+   //solve
+   // assert(!solve(6)); // (0,1) to (0,2)
+   
 }
 
 /* helper functions */
@@ -192,55 +195,45 @@ bool checkTouching(pair z)
    return is_adjacent;
 }
 
-void take_and_cpy(boards *h, board *mb, int j, int i)
-{
+void take_and_cpy(boards *head, board *mb, int j, int i){
    eight_dirs dir = dir_init();
    for (int range = 1; range <= BOARD_W ; range++){
       for (int nei=0; nei < EIGHT_DIRS; nei++){
-         // init
          int nj = j + dir.j[nei] * range; 
          int ni = i + dir.i[nei] * range;
          board clean_board;
-         board *cpy_b = &clean_board;
-         board_copy(mb, cpy_b);         
-         
-         // check if we can take and inbound
-         bool is_inbound = inbound(nj, ni);
-         bool is_taken = take(cpy_b, (pair){i, j, ni, nj});
-         if (is_inbound && is_taken){
-            // cpy_b is taken
-            // if unique, add to head
-            bool is_unique = checkUnique(h, cpy_b);
+         board *cpy_b = &clean_board; 
+         board_copy(mb, cpy_b);
+         if (inbound(nj, ni) && take(cpy_b, (pair){i, j, ni, nj})){
+            bool is_unique = checkUnique(head, cpy_b);
             if (is_unique) {
-               board_copy(cpy_b, &h->b_arr[h->end]);
-               h->end++;
+               board_copy(cpy_b, &head->b_arr[head->end]);
+               head->end++;
             }
          }
       }
    }
 }
 
-void board_copy(board *old_b, board *new_b)
-{
+void board_copy(board *old_board, board *new_board){
    for (int j=0; j<BOARD_H; j++){
       for (int i=0; i<BOARD_W; i++){
-         new_b->mat[j][i] = old_b->mat[j][i];
+         new_board->mat[j][i] = old_board->mat[j][i];
       }
    }
 }
 
-bool checkUnique(boards *h, board *new_b)
-{
-   for (int i = 0; i < h->end; i++){
+bool checkUnique(boards *main_board_head, board *new_board) {
+   for (int i = 0; i < main_board_head->end; i++) {
       bool identical = true;
-      for (int j = 0; j < BOARD_H; j++){
-         for (int k = 0; k < BOARD_W; k++){
-            if (h->b_arr[i].mat[j][k] != new_b->mat[j][k]){
-               identical = false;
-            }
+      for (int j = 0; j < BOARD_H && identical; j++) {
+         for (int k = 0; k < BOARD_W; k++) {
+               if (main_board_head->b_arr[i].mat[j][k] != new_board->mat[j][k]) {
+                  identical = false;
+               }
          }
       }
-      if (identical){
+      if (identical) {
          return false;
       }
    }

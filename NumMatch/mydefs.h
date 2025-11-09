@@ -18,7 +18,7 @@ struct board {
 typedef struct board board;
 
 struct boards {
-   board arr_val[BOARDS_MAX];
+   board b_arr[BOARDS_MAX];
    long f;
    long end;
 };

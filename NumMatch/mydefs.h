@@ -36,13 +36,13 @@ struct position_list {
 };
 typedef struct position_list position_list;
 
+int abs_val(int x);
 bool inbound(int j, int i);
 bool checkLinear(pair z);
 bool checkNoBetween(board* p, pair z);
 bool checkStraight(board* p, pair z);
 bool checkTouching(pair z);
 bool checkUnique(boards *main_board_head, board *new_board);
-int abs_val(int x);
 void board_copy(board *old_board, board *new_board);
 void take_and_cpy(boards *head, board *mother_board, int j, int i);
 eight_dirs dir_init(void);

@@ -233,7 +233,7 @@ bool checkUnique(boards *h, board *new_b)
 {
    for (int i = 0; i < h->end; i++){
       bool identical = true;
-      for (int j = 0; j < BOARD_H && identical; j++){
+      for (int j = 0; j < BOARD_H; j++){
          for (int k = 0; k < BOARD_W; k++){
             if (h->b_arr[i].mat[j][k] != new_b->mat[j][k]){
                identical = false;

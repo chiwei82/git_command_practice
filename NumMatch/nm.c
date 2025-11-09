@@ -153,7 +153,7 @@ bool checkLinear(pair z)
    bool is_vertical = (dy == 0 && dx != 0);
    bool is_horizontal = (dx == 0 && dy != 0);
    bool is_diagonal = (abs_val(dy) == abs_val(dx));
-   if ( is_vertical || is_horizontal || is_diagonal){
+   if (is_vertical || is_horizontal || is_diagonal){
       is_linear = true;
    }
    return is_linear;
@@ -168,7 +168,7 @@ bool checkNoBetween(board* p, pair z)
    
    bool is_clear = true;
    int j = y1 + step_y, i = x1 + step_x;
-   while (inbound(j, i) && (j != y2 || i != x2)) {
+   while (inbound(j, i) && (j != y2 || i != x2)){
       if (p->mat[j][i] != PAIRED){
          return false;
       }
@@ -199,14 +199,15 @@ void take_and_cpy(boards *head, board *mb, int j, int i)
    eight_dirs dir = dir_init();
    for (int range = 1; range <= BOARD_W ; range++){
       for (int nei=0; nei < EIGHT_DIRS; nei++){
-         int nj = j + dir.j[nei] * range; 
+         int nj = j + dir.j[nei] * range;
          int ni = i + dir.i[nei] * range;
          board clean_board;
-         board *cpy_b = &clean_board; 
+         board *cpy_b = &clean_board;
+         pair check_pair = {i, j, ni, nj};
          board_copy(mb, cpy_b);
-         if (inbound(nj, ni) && take(cpy_b, (pair){i, j, ni, nj})){
+         if (inbound(nj, ni) && take(cpy_b, check_pair)){
             bool is_unique = checkUnique(head, cpy_b);
-            if (is_unique) {
+            if (is_unique){
                board_copy(cpy_b, &head->b_arr[head->end]);
                head->end++;
             }

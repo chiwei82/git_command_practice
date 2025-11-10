@@ -231,11 +231,11 @@ bool checkUnique(boards *head, board *new_board)
       bool identical = true;
       for (int j = 0; j < BOARD_H && identical; j++){
          for (int k = 0; k < BOARD_W; k++){
-               int head_val = head->b_arr[i].mat[j][k];
-               int new_val = new_board->mat[j][k];
-               if (head_val != new_val){
-                  identical = false;
-               }
+            int head_val = head->b_arr[i].mat[j][k];
+            int new_val = new_board->mat[j][k];
+            if (head_val != new_val){
+               identical = false;
+            }
          }
       }
       if (identical){

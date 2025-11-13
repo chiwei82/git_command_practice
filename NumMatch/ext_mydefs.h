@@ -7,6 +7,7 @@
 #define PAIRED_SUM 10
 #define EIGHT_DIRS 8
 #define DIMENSION 2
+#define MAX_CACHE 100000
 
 /* Put other #includes here,
    your struct board, helper function
@@ -14,13 +15,14 @@
 */
 struct board {
    int mat[BOARD_H][BOARD_W];
+   int depth;
 };
 typedef struct board board;
 
 struct boards {
-   board arr_val[BOARDS_MAX];
-   long f;
-   long end;
+   board b_arr[BOARDS_MAX];
+   long f;   // where mother board is
+   long end; // where child board can be inserted
 };
 typedef struct boards boards;
 
@@ -36,13 +38,18 @@ struct position_list {
 };
 typedef struct position_list position_list;
 
+typedef unsigned long ul;
+
 int abs_val(int x);
 bool inbound(int j, int i);
 bool checkLinear(pair z);
 bool checkNoBetween(board* p, pair z);
 bool checkStraight(board* p, pair z);
 bool checkTouching(pair z);
-bool checkUnique(boards *main_board_head, board *new_board);
-void board_copy(board *old_board, board *new_board);
-void take_and_cpy(boards *head, board *mother_board, int j, int i);
+bool take_check(board* p, pair z);
+bool dfs(board *p, ul cache[], int *cache_count);
+bool seen_before(ul h, ul visited[], int visited_count);
+void add_seen(ul h, ul visited[], int *visited_count);
+ul hash_board(const board *p);
 eight_dirs dir_init(void);
+position_list find_pos(board *b, int j, int i);

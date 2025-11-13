@@ -1,37 +1,89 @@
-#include "nm.h"
+#include "ext_nm.h"
 
 bool solve(int seed)
 {
-   boards main_board;
-   boards *head = &main_board;
-   board first_b = randfill(seed);
+   ul visited[MAX_CACHE];
+   int visited_count = 0;
+   board origin_board = randfill(seed);
+   origin_board.depth = 0;
+   board *p = &origin_board;
+   // DFS + backtrack
+   return dfs(p, visited, &visited_count);
+}
 
-   // init first board
-   main_board.f = 0;
-   main_board.end = 1;
-   main_board.arr_val[0] = first_b;
-   // mother pointer points to first board
-   do {
-      // mother_board pointed to where f is
-      board *mother_board = &main_board.arr_val[main_board.f];
-      for (int j=0; j<BOARD_H; j++){
-         for(int i=0; i<BOARD_W; i++){
-            // loop and find possible num_2
-            take_and_cpy(head, mother_board, j, i);
-         }
+// cache
+// turn board into hash status
+ul hash_board(const board *p) {
+   ul hash = 5381;
+   for (int j = 0; j < BOARD_H; j++) {
+      for (int i = 0; i < BOARD_W; i++) {
+         hash = ((hash << 5) + hash) + p->mat[j][i];
       }
-      main_board.f++;
-   } while ( main_board.f != main_board.end );
+   }
+   return hash;
+}
 
-   // check if all paired
+bool seen_before(ul h, ul visited[], int visited_count)
+{
+   for (int i = 0; i < visited_count; i++) {
+      if (visited[i] == h)
+         return true;
+   }
+   return false;
+}
+
+void add_seen(ul h, ul visited[], int *visited_count)
+{
+   if (*visited_count < MAX_CACHE) {
+      visited[(*visited_count)++] = h;
+   }
+}
+
+// depth first search + backtracking + cache
+bool dfs(board *p, ul visited[], int *visited_count)
+{
+   // if (board) is visited, we dont wnat to visit again
+   ul h = hash_board(p);
+   if (seen_before(h, visited, *visited_count)){
+      return false;
+   }
+   add_seen(h, visited, visited_count);
+   
+   // termination condition
+   if (p->depth == 10){
+      return true;
+   }
+
    for (int j=0; j<BOARD_H; j++){
-      for(int i=0; i<BOARD_W; i++){
-         if (main_board.arr_val[main_board.f-1].mat[j][i] != PAIRED){
-            return false;
+      for (int i=0; i<BOARD_W; i++){
+
+         position_list pList = find_pos(p, j, i);
+         // for every possible next
+         for (int k=0; k<pList.count ; k++){
+            int nj = pList.pos_list[k][0];
+            int ni = pList.pos_list[k][1];
+
+            // store value for backtrack
+            int v_ji = p->mat[j][i];
+            int v_njni = p->mat[nj][ni];
+            
+            // mark as visited
+            p->mat[j][i] = PAIRED;
+            p->mat[nj][ni] = PAIRED;
+            p->depth += 1;
+            
+            if (dfs(p, visited, visited_count)){
+               return true;
+            }
+
+            // backtrack
+            p->depth -= 1;
+            p->mat[j][i] = v_ji;
+            p->mat[nj][ni] = v_njni;
          }
       }
    }
-   return true;
+   return false;
 }
 
 bool take(board* p, pair z)
@@ -40,7 +92,8 @@ bool take(board* p, pair z)
    int x1 = z.x1, x2 = z.x2, y1 = z.y1, y2 = z.y2;
    int num_1 = p->mat[y1][x1], num_2 = p->mat[y2][x2];
    
-   bool is_same = (num_1 == num_2 && num_1 != PAIRED && num_2 != PAIRED);
+   bool isnt_paired = (num_1 != PAIRED && num_2 != PAIRED);
+   bool is_same = (num_1 == num_2 && isnt_paired);
    bool is_ten = (num_1 + num_2 == PAIRED_SUM);
    bool is_straight = checkStraight(p, z);
    bool is_touching = checkTouching(z);
@@ -51,6 +104,27 @@ bool take(board* p, pair z)
    if ((is_same || is_ten) && (is_straight || is_touching)){
       p->mat[y1][x1] = PAIRED;
       p->mat[y2][x2] = PAIRED;
+      return true;
+   }
+   return false;
+}
+
+bool take_check(board* p, pair z)
+{
+   // x means i, y menas j ; called by mat[j][i]
+   int x1 = z.x1, x2 = z.x2, y1 = z.y1, y2 = z.y2;
+   int num_1 = p->mat[y1][x1], num_2 = p->mat[y2][x2];
+   
+   bool isnt_paired = (num_1 != PAIRED && num_2 != PAIRED);
+   bool is_same = (num_1 == num_2 && isnt_paired);
+   bool is_ten = (num_1 + num_2 == PAIRED_SUM);
+   bool is_straight = checkStraight(p, z);
+   bool is_touching = checkTouching(z);
+
+   // if it's same      or  it's sum to ten
+   //    and
+   //    it's touching  or  it's straight
+   if ((is_same || is_ten) && (is_straight || is_touching)){
       return true;
    }
    return false;
@@ -104,9 +178,12 @@ void test(void)
    assert(checkStraight(&b, (pair){1,1,1,2}));  // (1,1) to (2,1)
    assert(!checkStraight(&b, (pair){2,2,0,2})); // (2,2) paired to (2,0)
    assert(checkStraight(&b, (pair){3,0,2,1}));  // (0,3) to (1,2) paired
-   //solve
-   assert(!solve(6)); // (0,1) to (0,2)
-   
+   // solve
+   // for (int i=0;i<2000;i++){
+   //    if (solve(i)){
+   //       printf("%i \n", i);
+   //    }
+   // }
 }
 
 /* helper functions */
@@ -153,7 +230,7 @@ bool checkLinear(pair z)
    bool is_vertical = (dy == 0 && dx != 0);
    bool is_horizontal = (dx == 0 && dy != 0);
    bool is_diagonal = (abs_val(dy) == abs_val(dx));
-   if ( is_vertical || is_horizontal || is_diagonal){
+   if (is_vertical || is_horizontal || is_diagonal){
       is_linear = true;
    }
    return is_linear;
@@ -168,7 +245,7 @@ bool checkNoBetween(board* p, pair z)
    
    bool is_clear = true;
    int j = y1 + step_y, i = x1 + step_x;
-   while (inbound(j, i) && (j != y2 || i != x2)) {
+   while (inbound(j, i) && (j != y2 || i != x2)){
       if (p->mat[j][i] != PAIRED){
          return false;
       }
@@ -194,47 +271,23 @@ bool checkTouching(pair z)
    return is_adjacent;
 }
 
-void take_and_cpy(boards *head, board *mother_board, int j, int i){
+position_list find_pos(board *b, int j, int i)
+{
+   position_list pos_list;
+   pos_list.count = 0;
    eight_dirs dir = dir_init();
+
    for (int range = 1; range <= BOARD_W ; range++){
       for (int nei=0; nei < EIGHT_DIRS; nei++){
-         int nj = j + dir.j[nei] * range; 
+         int nj = j + dir.j[nei] * range;
          int ni = i + dir.i[nei] * range;
-         board clean_board;
-         board *cpy_b = &clean_board; 
-         board_copy(mother_board, cpy_b);
-         if (inbound(nj, ni) && take(cpy_b, (pair){i, j, ni, nj})){
-            bool is_unique = checkUnique(head, cpy_b);
-            if (is_unique) {
-               board_copy(cpy_b, &head->arr_val[head->end]);
-               head->end++;
-            }
+         pair new_pair = {i, j, ni, nj};
+         if (inbound(nj, ni) && take_check(b, new_pair)){
+            pos_list.pos_list[pos_list.count][0] = nj;
+            pos_list.pos_list[pos_list.count][1] = ni;
+            pos_list.count++;
          }
       }
    }
-}
-
-void board_copy(board *old_board, board *new_board){
-   for (int j=0; j<BOARD_H; j++){
-      for (int i=0; i<BOARD_W; i++){
-         new_board->mat[j][i] = old_board->mat[j][i];
-      }
-   }
-}
-
-bool checkUnique(boards *main_board_head, board *new_board) {
-   for (int i = 0; i < main_board_head->end; i++) {
-      bool identical = true;
-      for (int j = 0; j < BOARD_H && identical; j++) {
-         for (int k = 0; k < BOARD_W; k++) {
-               if (main_board_head->arr_val[i].mat[j][k] != new_board->mat[j][k]) {
-                  identical = false;
-               }
-         }
-      }
-      if (identical) {
-         return false;
-      }
-   }
-   return true;
+   return pos_list;
 }
